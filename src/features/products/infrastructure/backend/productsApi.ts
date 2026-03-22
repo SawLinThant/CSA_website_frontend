@@ -10,7 +10,7 @@ import {
 
 export const productsApi = {
   async listPublicProducts(query: PublicListProductsQuery): Promise<PublicProductListResponse> {
-    const data = await backendGetJson<unknown>("/products", query as Record<string, string | number | boolean | undefined>, {
+    const data = await backendGetJson<unknown>("/api/products", query as Record<string, string | number | boolean | undefined>, {
       requiresAuth: false,
       revalidate: 60,
     });
@@ -18,7 +18,7 @@ export const productsApi = {
   },
 
   async getPublicProduct(productId: string): Promise<Product> {
-    const data = await backendGetJson<unknown>(`/products/${productId}`, undefined, {
+    const data = await backendGetJson<unknown>(`/api/products/${productId}`, undefined, {
       requiresAuth: false,
       revalidate: 60,
     });

@@ -10,7 +10,13 @@ import { usePathname } from "next/navigation";
 import { getLocaleFromPathname, stripLocaleFromPathname, withLocalePath } from "@/i18n/config";
 import type { AppMessages } from "@/i18n/messages";
 
-export default function MobileNav({ messages }: { messages: AppMessages }) {
+export default function MobileNav({
+  messages,
+  onOpenAuth,
+}: {
+  messages: AppMessages;
+  onOpenAuth?: (mode: "login" | "register") => void;
+}) {
   const pathname = usePathname();
   const locale = getLocaleFromPathname(pathname);
   const barePath = stripLocaleFromPathname(pathname);
@@ -53,6 +59,31 @@ export default function MobileNav({ messages }: { messages: AppMessages }) {
                 Close
               </button>
             </div>
+
+            {onOpenAuth ? (
+              <div className="mt-4 flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    onOpenAuth("login");
+                    setOpen(false);
+                  }}
+                  className="w-full rounded-[10px] border border-primary/30 py-2.5 text-sm font-medium text-primary"
+                >
+                  {messages.auth.login}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onOpenAuth("register");
+                    setOpen(false);
+                  }}
+                  className="w-full rounded-[10px] bg-primary py-2.5 text-sm font-semibold text-white"
+                >
+                  {messages.auth.register}
+                </button>
+              </div>
+            ) : null}
 
             <nav className="mt-6 space-y-2">
               {items.map((item) => {

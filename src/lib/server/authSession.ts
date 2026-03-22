@@ -24,7 +24,7 @@ async function getCookieValue(name: string): Promise<string | null> {
   return v;
 }
 
-async function setCookieValue(name: string, value: string, maxAgeSeconds: number) {
+async function setCookieValue(name: string, value: string, maxAgeSeconds?: number) {
   const store = await cookieStore();
   store.set({
     name,
@@ -33,7 +33,7 @@ async function setCookieValue(name: string, value: string, maxAgeSeconds: number
     secure: cookieSecurity.secure,
     sameSite: env.COOKIE_SAMESITE,
     path: "/",
-    maxAge: maxAgeSeconds,
+    ...(maxAgeSeconds !== undefined ? { maxAge: maxAgeSeconds } : {}),
   });
 }
 
@@ -42,9 +42,28 @@ async function deleteCookieValue(name: string) {
   store.delete(name);
 }
 
-async function clearAuthCookies() {
+export async function clearAuthCookies() {
   await deleteCookieValue(env.AUTH_ACCESS_TOKEN_COOKIE_NAME);
   await deleteCookieValue(env.AUTH_REFRESH_TOKEN_COOKIE_NAME);
+}
+
+/** Store tokens from login/register; refresh cookie uses session storage when rememberMe is false. */
+export async function persistAuthTokens(
+  accessToken: string,
+  refreshToken: string,
+  options?: { rememberMe?: boolean },
+) {
+  const rememberMe = options?.rememberMe ?? true;
+  await setCookieValue(
+    env.AUTH_ACCESS_TOKEN_COOKIE_NAME,
+    accessToken,
+    AUTH_ACCESS_COOKIE_MAX_AGE_SECONDS,
+  );
+  await setCookieValue(
+    env.AUTH_REFRESH_TOKEN_COOKIE_NAME,
+    refreshToken,
+    rememberMe ? AUTH_REFRESH_COOKIE_MAX_AGE_SECONDS : undefined,
+  );
 }
 
 export async function getRefreshToken(): Promise<string | null> {
@@ -59,7 +78,7 @@ async function refreshTokensFromBackend(refreshToken: string): Promise<{
   accessToken: string;
   refreshToken: string | null;
 } | null> {
-  const res = await fetch(env.API_BASE_URL + "/refresh", {
+  const res = await fetch(`${env.API_BASE_URL}/auth/refresh`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ refreshToken }),

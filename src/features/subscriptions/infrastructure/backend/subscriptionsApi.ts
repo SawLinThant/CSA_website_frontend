@@ -16,19 +16,19 @@ import {
 
 export const subscriptionsApi = {
   async listMySubscriptions(query: ListMySubscriptionsQuery): Promise<CustomerSubscriptionListResponse> {
-    const data = await backendGetJson<unknown>("/customer/subscriptions", query as Record<string, string | number | boolean | undefined>, {
+    const data = await backendGetJson<unknown>("/auth/customer/subscriptions", query as Record<string, string | number | boolean | undefined>, {
       requiresAuth: true,
     });
     return publicSubscriptionListResponseSchema.parse(data);
   },
 
   async getMySubscription(id: string): Promise<Subscription> {
-    const data = await backendGetJson<unknown>(`/customer/subscriptions/${id}`, undefined, { requiresAuth: true });
+    const data = await backendGetJson<unknown>(`/auth/customer/subscriptions/${id}`, undefined, { requiresAuth: true });
     return subscriptionSchema.parse(data);
   },
 
   async listPublicSubscriptionPlans(query: PublicListSubscriptionPlansQuery): Promise<SubscriptionPlansListResponse> {
-    const data = await backendGetJson<unknown>("/subscription-plans", query as Record<string, string | number | boolean | undefined>, {
+    const data = await backendGetJson<unknown>("/api/subscription-plans", query as Record<string, string | number | boolean | undefined>, {
       requiresAuth: false,
       revalidate: 60,
     });
@@ -36,7 +36,7 @@ export const subscriptionsApi = {
   },
 
   async getPublicSubscriptionPlan(id: string): Promise<SubscriptionPlan> {
-    const data = await backendGetJson<unknown>(`/subscription-plans/${id}`, undefined, {
+    const data = await backendGetJson<unknown>(`/api/subscription-plans/${id}`, undefined, {
       requiresAuth: false,
       revalidate: 60,
     });
