@@ -1,7 +1,5 @@
 import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
-import Header from "@/components/site/header";
-import Footer from "@/components/site/footer";
 import { isLocale } from "@/i18n/config";
 
 export default async function LocaleLayout({
@@ -16,12 +14,5 @@ export default async function LocaleLayout({
     notFound();
   }
 
-  return (
-    <div className="min-h-full flex flex-col items-center justify-center">
-      <Header />
-      <main className="container flex-1 px-4">{children}</main>
-      <Footer locale={locale} />
-    </div>
-  );
+  return <>{children}</>;
 }
-

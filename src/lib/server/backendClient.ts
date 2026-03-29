@@ -1,12 +1,63 @@
 import { z } from "zod";
 import { env } from "./env";
-import { forceRefreshAccessToken, getAccessToken } from "./authSession";
+import { getAccessToken } from "./authSession";
 
 export type ApiErrorPayload = {
   error?: string;
   details?: unknown;
   message?: string;
 };
+
+/** Thrown when the backend returns a non-2xx response. Preserves status and body for logging or UI. */
+export class BackendRequestError extends Error {
+  readonly status: number;
+  readonly statusText: string;
+  readonly path: string;
+  readonly payload: unknown;
+
+  constructor(args: {
+    message: string;
+    status: number;
+    statusText: string;
+    path: string;
+    payload: unknown;
+  }) {
+    super(args.message);
+    this.name = "BackendRequestError";
+    this.status = args.status;
+    this.statusText = args.statusText;
+    this.path = args.path;
+    this.payload = args.payload;
+  }
+}
+
+export function isBackendRequestError(e: unknown): e is BackendRequestError {
+  return e instanceof BackendRequestError;
+}
+
+function messageFromErrorBody(payload: unknown, status: number): string {
+  if (payload != null && typeof payload === "object") {
+    const p = payload as Record<string, unknown>;
+    if (typeof p.error === "string" && p.error.trim()) return p.error.trim();
+    if (typeof p.message === "string" && p.message.trim()) return p.message.trim();
+  }
+  return `Request failed with status ${status}`;
+}
+
+function throwBackendError(
+  path: string,
+  response: Response,
+  json: unknown,
+): never {
+  const message = messageFromErrorBody(json, response.status);
+  throw new BackendRequestError({
+    message,
+    status: response.status,
+    statusText: response.statusText,
+    path,
+    payload: json,
+  });
+}
 
 type JsonValue = string | number | boolean | null | JsonValue[] | { [k: string]: JsonValue };
 
@@ -80,32 +131,19 @@ export async function backendRequestJson<TResponse>(
     accessToken = await getAccessToken();
   }
 
-  let response = await doRequest(accessToken);
-
-  // Refresh-on-demand: if access token is present but expired/invalid, force refresh once.
-  if (response.status === 401 && options.requiresAuth) {
-    const refreshed = await forceRefreshAccessToken();
-    if (refreshed) {
-      response = await doRequest(refreshed);
-    }
-  }
+  const response = await doRequest(accessToken);
 
   const json = await parseJsonSafe<unknown>(response);
 
   if (!response.ok) {
-    const payload = (json ?? {}) as ApiErrorPayload;
-    const message =
-      payload.error ??
-      payload.message ??
-      `Request failed with status ${response.status}`;
-    throw new Error(message);
+    throwBackendError(path, response, json);
   }
 
   // Optional runtime validation to catch backend contract drift.
   // If you pass a non-JSON response, this will throw (intentional).
   if (json === undefined) {
     // For 204 responses, callers should use a different function; keep this strict.
-    throw new Error("Expected JSON response, got empty body");
+    throw new Error(`Expected JSON response for ${path}, got empty body`);
   }
 
   return z.unknown().parse(json) as TResponse;
@@ -137,5 +175,53 @@ export async function backendPostJson<TRequest, TResponse>(
     revalidate: options?.revalidate,
     tags: options?.tags,
   });
+}
+
+export async function backendPatchJson<TRequest, TResponse>(
+  path: string,
+  body: TRequest,
+  options?: Omit<BackendRequestOptions, "query" | "body" | "requiresAuth"> & { requiresAuth?: boolean },
+): Promise<TResponse> {
+  return backendRequestJson<TResponse>("PATCH", path, {
+    body: body as unknown as JsonValue,
+    requiresAuth: options?.requiresAuth ?? true,
+    cache: "no-store",
+  });
+}
+
+/** Backend returns 204 No Content on success. */
+export async function backendDeleteNoContent(
+  path: string,
+  options?: { requiresAuth?: boolean },
+): Promise<void> {
+  const url = buildUrl(path);
+  let accessToken: string | null = null;
+  if (options?.requiresAuth !== false) {
+    accessToken = await getAccessToken();
+  }
+
+  async function doRequest(token?: string | null) {
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    return fetch(url, {
+      method: "DELETE",
+      headers,
+      cache: "no-store",
+      credentials: "omit",
+    });
+  }
+
+  const response = await doRequest(accessToken);
+
+  if (response.status === 204) {
+    return;
+  }
+
+  const json = await parseJsonSafe<unknown>(response);
+  if (!response.ok) {
+    throwBackendError(path, response, json);
+  }
 }
 

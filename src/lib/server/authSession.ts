@@ -98,7 +98,10 @@ async function refreshTokensFromBackend(refreshToken: string): Promise<{
   };
 }
 
-// Refresh-on-demand (used by backend client retry-on-401).
+/**
+ * Sets auth cookies — only valid from a Server Action or Route Handler (not during RSC).
+ * For normal navigations, refresh runs in `src/proxy.ts` before the app runs.
+ */
 export async function forceRefreshAccessToken(): Promise<string | null> {
   const refreshToken = await getRefreshToken();
   if (!refreshToken) {

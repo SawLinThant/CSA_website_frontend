@@ -4,7 +4,7 @@ import { persistAuthTokens } from "@/lib/server/authSession";
 import { normalizePhone, postBackendAuthJson } from "@/lib/server/backendAuthPost";
 
 const bodySchema = z.object({
-  role: z.enum(["customer", "farmer"]),
+  role: z.literal("customer"),
   phone: z.string().min(6),
   password: z.string().min(8),
   rememberMe: z.boolean().optional(),
@@ -17,9 +17,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
 
-  const { role, phone, password, rememberMe } = parsed.data;
-  const path = role === "customer" ? "/auth/customer/login" : "/auth/farmer/login";
-  const result = await postBackendAuthJson(path, {
+  const { phone, password, rememberMe } = parsed.data;
+  const result = await postBackendAuthJson("/auth/customer/login", {
     phone: normalizePhone(phone),
     password,
   });

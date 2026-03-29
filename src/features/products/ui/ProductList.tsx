@@ -1,5 +1,6 @@
 import type { Product } from "../domain/schemas";
 import Link from "next/link";
+import { formatMoneyAmount } from "@/lib/format/money";
 
 export function ProductList({ products }: { products: Product[] }) {
   return (
@@ -10,10 +11,7 @@ export function ProductList({ products }: { products: Product[] }) {
             <div className="font-semibold">{p.name}</div>
             <div className="text-sm opacity-70">{p.unit}</div>
             <div className="mt-2 font-medium">
-              {new Intl.NumberFormat(undefined, {
-                style: "currency",
-                currency: "USD",
-              }).format(p.basePrice)}
+              {formatMoneyAmount(p.basePrice, "en")}
             </div>
           </Link>
         </div>

@@ -2,11 +2,11 @@
 
 import { useEffect, useId, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import type { AppMessages } from "@/i18n/messages";
 
 type AuthMode = "login" | "register";
 type View = "login" | "register" | "otp";
-type Role = "customer" | "farmer";
 
 type AuthModalProps = {
   open: boolean;
@@ -77,7 +77,7 @@ export default function AuthModal({ open, onClose, initialMode, messages }: Auth
   const router = useRouter();
   const titleId = useId();
   const [view, setView] = useState<View>("login");
-  const [role, setRole] = useState<Role>("customer");
+  const role = "customer";
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -87,9 +87,6 @@ export default function AuthModal({ open, onClose, initialMode, messages }: Auth
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [farmName, setFarmName] = useState("");
-  const [farmLocation, setFarmLocation] = useState("");
-  const [farmDescription, setFarmDescription] = useState("");
   const [otp, setOtp] = useState("");
 
   const [mounted, setMounted] = useState(false);
@@ -164,13 +161,17 @@ export default function AuthModal({ open, onClose, initialMode, messages }: Auth
       });
       const data = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) {
-        setError(data.error ?? messages.errorGeneric);
+        const msg = data.error ?? messages.errorGeneric;
+        setError(msg);
+        toast.error(msg);
         return;
       }
+      toast.success(messages.toastLoginSuccess);
       router.refresh();
       onClose();
     } catch {
       setError(messages.errorGeneric);
+      toast.error(messages.errorGeneric);
     } finally {
       setLoading(false);
     }
@@ -183,10 +184,6 @@ export default function AuthModal({ open, onClose, initialMode, messages }: Auth
       setError(messages.passwordPlaceholder);
       return;
     }
-    if (role === "farmer" && (!farmName.trim() || !farmLocation.trim())) {
-      setError(messages.errorGeneric);
-      return;
-    }
     setLoading(true);
     try {
       const res = await fetch("/api/auth/otp/send", {
@@ -196,12 +193,16 @@ export default function AuthModal({ open, onClose, initialMode, messages }: Auth
       });
       const data = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) {
-        setError(data.error ?? messages.errorGeneric);
+        const msg = data.error ?? messages.toastOtpSendFailed;
+        setError(msg);
+        toast.error(msg);
         return;
       }
+      toast.success(messages.toastOtpSent);
       setView("otp");
     } catch {
       setError(messages.errorGeneric);
+      toast.error(messages.errorGeneric);
     } finally {
       setLoading(false);
     }
@@ -213,8 +214,8 @@ export default function AuthModal({ open, onClose, initialMode, messages }: Auth
     if (otp.length !== 6) return;
     setLoading(true);
     try {
-      const base = {
-        role,
+      const body = {
+        role: "customer" as const,
         name: name.trim(),
         email: email.trim() || undefined,
         phone,
@@ -222,15 +223,6 @@ export default function AuthModal({ open, onClose, initialMode, messages }: Auth
         otp,
         rememberMe,
       };
-      const body =
-        role === "customer"
-          ? base
-          : {
-              ...base,
-              farmName: farmName.trim(),
-              farmLocation: farmLocation.trim(),
-              farmDescription: farmDescription.trim() || undefined,
-            };
 
       const res = await fetch("/api/auth/register", {
         method: "POST",
@@ -239,47 +231,21 @@ export default function AuthModal({ open, onClose, initialMode, messages }: Auth
       });
       const data = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) {
-        setError(data.error ?? messages.errorGeneric);
+        const msg = data.error ?? messages.errorGeneric;
+        setError(msg);
+        toast.error(msg);
         return;
       }
+      toast.success(messages.toastRegisterSuccess);
       router.refresh();
       onClose();
     } catch {
       setError(messages.errorGeneric);
+      toast.error(messages.errorGeneric);
     } finally {
       setLoading(false);
     }
   }
-
-  const roleRadios = (
-    <fieldset className="mb-5 rounded-[10px] border border-neutral-200/70 bg-[#fff9f0] px-3 py-3">
-      <legend className="mb-2.5 text-xs font-medium text-neutral-800/80">{messages.roleLegend}</legend>
-      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-x-8 sm:gap-y-2">
-        <label className="flex cursor-pointer items-center gap-2.5">
-          <input
-            type="radio"
-            name="freshroot-auth-role"
-            value="customer"
-            checked={role === "customer"}
-            onChange={() => setRole("customer")}
-            className="size-4 shrink-0 border-neutral-400 text-primary accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary/40"
-          />
-          <span className="text-sm font-medium text-neutral-900">{messages.roleCustomer}</span>
-        </label>
-        <label className="flex cursor-pointer items-center gap-2.5">
-          <input
-            type="radio"
-            name="freshroot-auth-role"
-            value="farmer"
-            checked={role === "farmer"}
-            onChange={() => setRole("farmer")}
-            className="size-4 shrink-0 border-neutral-400 text-primary accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary/40"
-          />
-          <span className="text-sm font-medium text-neutral-900">{messages.roleFarmer}</span>
-        </label>
-      </div>
-    </fieldset>
-  );
 
   return (
     <div
@@ -326,15 +292,14 @@ export default function AuthModal({ open, onClose, initialMode, messages }: Auth
         </div>
 
         <div className="px-6 py-5">
-          {error ? (
+          {/* {error ? (
             <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
               {error}
             </p>
-          ) : null}
+          ) : null} */}
 
           {view === "login" ? (
             <form onSubmit={handleLogin} className="space-y-4">
-              {roleRadios}
               <div>
                 <label className="text-xs font-medium text-neutral-800/80">{messages.phoneLabel}</label>
                 <div className="mt-1 flex items-center border border-primary gap-2 rounded-[10px] bg-[#fff9f0] px-3 py-2.5 ring-primary/25 focus-within:ring-2">
@@ -398,7 +363,6 @@ export default function AuthModal({ open, onClose, initialMode, messages }: Auth
 
           {view === "register" ? (
             <form onSubmit={handleRegisterContinue} className="space-y-4">
-              {roleRadios}
               <div>
                 <label className="text-xs font-medium text-neutral-800/80">{messages.nameLabel}</label>
                 <div className="mt-1 flex items-center gap-2 rounded-[10px] border border-primary bg-[#fff9f0] px-3 py-2.5 ring-primary/25 focus-within:ring-2">
@@ -459,37 +423,6 @@ export default function AuthModal({ open, onClose, initialMode, messages }: Auth
                   />
                 </div>
               </div>
-              {role === "farmer" ? (
-                <>
-                  <div>
-                    <label className="text-xs font-medium text-neutral-800/80">{messages.farmNameLabel}</label>
-                    <input
-                      value={farmName}
-                      onChange={(e) => setFarmName(e.target.value)}
-                      className="mt-1 w-full rounded-[10px] bg-[#fff9f0] px-3 py-2.5 text-sm outline-none ring-primary/25 focus:ring-2"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium text-neutral-800/80">{messages.farmLocationLabel}</label>
-                    <input
-                      value={farmLocation}
-                      onChange={(e) => setFarmLocation(e.target.value)}
-                      className="mt-1 w-full rounded-[10px] bg-[#fff9f0] px-3 py-2.5 text-sm outline-none ring-primary/25 focus:ring-2"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium text-neutral-800/80">{messages.farmDescriptionLabel}</label>
-                    <textarea
-                      value={farmDescription}
-                      onChange={(e) => setFarmDescription(e.target.value)}
-                      rows={2}
-                      className="mt-1 w-full resize-none rounded-[10px] bg-[#fff9f0] px-3 py-2.5 text-sm outline-none ring-primary/25 focus:ring-2"
-                    />
-                  </div>
-                </>
-              ) : null}
               <label className="flex cursor-pointer items-center gap-2 text-sm text-neutral-800/75">
                 <input
                   type="checkbox"

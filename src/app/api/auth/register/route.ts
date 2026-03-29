@@ -18,21 +18,7 @@ const customerRegisterSchema = z.object({
   otp: z.string().regex(/^\d{6}$/),
   rememberMe: z.boolean().optional(),
 });
-
-const farmerRegisterSchema = z.object({
-  role: z.literal("farmer"),
-  name: z.string().min(1),
-  email: z.string().optional(),
-  phone: z.string().min(6),
-  password: z.string().min(8),
-  farmName: z.string().min(1),
-  farmLocation: z.string().min(1),
-  farmDescription: z.string().optional(),
-  otp: z.string().regex(/^\d{6}$/),
-  rememberMe: z.boolean().optional(),
-});
-
-const bodySchema = z.discriminatedUnion("role", [customerRegisterSchema, farmerRegisterSchema]);
+const bodySchema = customerRegisterSchema;
 
 export async function POST(req: Request) {
   const json = await req.json().catch(() => null);
@@ -44,38 +30,16 @@ export async function POST(req: Request) {
   const data = parsed.data;
   const rememberMe = data.rememberMe ?? true;
 
-  if (data.role === "customer") {
-    const email = optionalEmail(data.email);
-    const payload: Record<string, unknown> = {
-      name: data.name,
-      phone: normalizePhone(data.phone),
-      password: data.password,
-      otp: data.otp,
-    };
-    if (email) payload.email = email;
-
-    const result = await postBackendAuthJson("/auth/customer/register", payload);
-    if (!result.ok) {
-      return NextResponse.json({ error: result.error }, { status: result.status });
-    }
-    await persistAuthTokens(result.data.accessToken, result.data.refreshToken, { rememberMe });
-    return NextResponse.json({ user: result.data.user }, { status: 201 });
-  }
-
   const email = optionalEmail(data.email);
   const payload: Record<string, unknown> = {
     name: data.name,
     phone: normalizePhone(data.phone),
     password: data.password,
-    farmName: data.farmName,
-    farmLocation: data.farmLocation,
     otp: data.otp,
   };
   if (email) payload.email = email;
-  const desc = data.farmDescription?.trim();
-  if (desc) payload.farmDescription = desc;
 
-  const result = await postBackendAuthJson("/auth/farmer/register", payload);
+  const result = await postBackendAuthJson("/auth/customer/register", payload);
   if (!result.ok) {
     return NextResponse.json({ error: result.error }, { status: result.status });
   }

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { publicGetProductUseCase } from "@/features/products/application/useCases/publicGetProduct";
+import { formatMoneyAmount } from "@/lib/format/money";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +30,7 @@ export default async function ProductDetailsPage({
         Category: {product.categoryId} | Unit: {product.unit}
       </p>
       <p className="mt-3 text-base font-medium">
-        {new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(product.basePrice)}
+        {formatMoneyAmount(product.basePrice, "en")}
       </p>
       <p className="mt-4 text-sm opacity-70">
         {product.description ?? "No description"}

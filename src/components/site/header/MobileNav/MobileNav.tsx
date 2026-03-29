@@ -12,10 +12,18 @@ import type { AppMessages } from "@/i18n/messages";
 
 export default function MobileNav({
   messages,
+  isLoggedIn,
+  isFarmer,
+  isCustomer,
   onOpenAuth,
+  onLogout,
 }: {
   messages: AppMessages;
-  onOpenAuth?: (mode: "login" | "register") => void;
+  isLoggedIn: boolean;
+  isFarmer: boolean;
+  isCustomer: boolean;
+  onOpenAuth: (mode: "login" | "register") => void;
+  onLogout: () => void;
 }) {
   const pathname = usePathname();
   const locale = getLocaleFromPathname(pathname);
@@ -60,30 +68,78 @@ export default function MobileNav({
               </button>
             </div>
 
-            {onOpenAuth ? (
-              <div className="mt-4 flex flex-col gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    onOpenAuth("login");
-                    setOpen(false);
-                  }}
-                  className="w-full rounded-[10px] border border-primary/30 py-2.5 text-sm font-medium text-primary"
+            <div className="mt-4 flex flex-col gap-2">
+              {isFarmer ? (
+                <Link
+                  href={withLocalePath(locale, "/farmer")}
+                  onClick={() => setOpen(false)}
+                  className="w-full rounded-[10px] border border-primary/30 py-2.5 text-center text-sm font-medium text-primary"
                 >
-                  {messages.auth.login}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    onOpenAuth("register");
-                    setOpen(false);
-                  }}
-                  className="w-full rounded-[10px] bg-primary py-2.5 text-sm font-semibold text-white"
+                  {messages.farmer.navDashboard}
+                </Link>
+              ) : (
+                <Link
+                  href={withLocalePath(locale, "/farmer-portal/login")}
+                  onClick={() => setOpen(false)}
+                  className="w-full rounded-[10px] border border-primary/30 py-2.5 text-center text-sm font-medium text-primary"
                 >
-                  {messages.auth.register}
-                </button>
-              </div>
-            ) : null}
+                  {messages.farmer.navDashboard}
+                </Link>
+              )}
+              {isLoggedIn ? (
+                <>
+                  {isCustomer ? (
+                    <Link
+                      href={withLocalePath(locale, "/orders")}
+                      onClick={() => setOpen(false)}
+                      className="w-full rounded-[10px] border border-primary/30 py-2.5 text-center text-sm font-medium text-primary"
+                    >
+                      Orders
+                    </Link>
+                  ) : null}
+                  <Link
+                    href={withLocalePath(locale, "/profile")}
+                    onClick={() => setOpen(false)}
+                    className="w-full rounded-[10px] border border-primary/30 py-2.5 text-center text-sm font-medium text-primary"
+                  >
+                    Profile
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onLogout();
+                      setOpen(false);
+                    }}
+                    className="w-full rounded-[10px] border border-primary/40 py-2.5 text-sm font-semibold text-primary"
+                  >
+                    {messages.auth.logout}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onOpenAuth("login");
+                      setOpen(false);
+                    }}
+                    className="w-full rounded-[10px] border border-primary/30 py-2.5 text-sm font-medium text-primary"
+                  >
+                    {messages.auth.login}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onOpenAuth("register");
+                      setOpen(false);
+                    }}
+                    className="w-full rounded-[10px] bg-primary py-2.5 text-sm font-semibold text-white"
+                  >
+                    {messages.auth.register}
+                  </button>
+                </>
+              )}
+            </div>
 
             <nav className="mt-6 space-y-2">
               {items.map((item) => {

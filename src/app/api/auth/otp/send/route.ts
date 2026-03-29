@@ -4,7 +4,7 @@ import { env } from "@/lib/server/env";
 import { normalizePhone } from "@/lib/server/backendAuthPost";
 
 const bodySchema = z.object({
-  role: z.enum(["customer", "farmer"]),
+  role: z.literal("customer"),
   phone: z.string().min(6),
 });
 
@@ -15,10 +15,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
 
-  const path =
-    parsed.data.role === "customer" ? "/auth/customer/otp/send" : "/auth/farmer/otp/send";
-
-  const res = await fetch(`${env.API_BASE_URL}${path}`, {
+  const res = await fetch(`${env.API_BASE_URL}/auth/customer/otp/send`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ phone: normalizePhone(parsed.data.phone) }),

@@ -62,6 +62,10 @@ export const publicListSubscriptionPlansQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(20),
   boxId: z.string().min(1).optional(),
   active: z.coerce.boolean().optional(),
+  deliveryFrequency: deliveryFrequencySchema.optional(),
+  minPrice: z.coerce.number().positive().optional(),
+  maxPrice: z.coerce.number().positive().optional(),
+  sortBy: z.enum(["newest", "priceAsc", "priceDesc", "nameAsc"]).optional(),
 });
 
 export type PublicListSubscriptionPlansQuery = z.infer<typeof publicListSubscriptionPlansQuerySchema>;
