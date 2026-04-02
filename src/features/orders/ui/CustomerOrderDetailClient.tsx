@@ -122,6 +122,22 @@ export default function CustomerOrderDetailClient({ locale, orderId }: Props) {
   const uniqueProducts = new Set(order.items.map((i) => i.product.id)).size;
   const progress = deliveryProgressPercent(order.delivery?.deliveryStatus);
   const deliveryComplete = order.delivery?.deliveryStatus === "delivered";
+  const deliveryTargetIso = order.deliveryDate ?? order.cycleDate;
+  const deliveryTargetDate = deliveryTargetIso ? new Date(deliveryTargetIso) : null;
+  const deliveryTargetValid = deliveryTargetDate != null && !Number.isNaN(deliveryTargetDate.getTime());
+  const isDelayed =
+    deliveryTargetValid &&
+    !deliveryComplete &&
+    Date.now() > (deliveryTargetDate as Date).getTime();
+  const delayReason = !isDelayed
+    ? null
+    : order.delivery?.deliveryStatus === "out_for_delivery"
+      ? "Driver delay / route delay."
+      : order.status === "pending"
+        ? "Packing is taking longer than expected."
+        : order.status === "packed" && order.delivery?.deliveryStatus === "scheduled"
+          ? "Awaiting dispatch."
+          : "Delivery delayed.";
 
   return (
     <div className="mx-auto w-full max-w-6xl py-8">
@@ -261,6 +277,11 @@ export default function CustomerOrderDetailClient({ locale, orderId }: Props) {
               label="Delivery target"
               value={dateLabel(order.deliveryDate ?? order.cycleDate)}
             />
+            {isDelayed && delayReason ? (
+              <li className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                <span className="font-semibold">Delayed.</span> {delayReason}
+              </li>
+            ) : null}
             <DetailRow
               icon={Box}
               label="Box version"

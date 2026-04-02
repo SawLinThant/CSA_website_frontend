@@ -9,6 +9,7 @@ export const subscriptionSchema = z.object({
   status: subscriptionStatusSchema,
   startDate: z.string().min(1),
   nextDeliveryDate: z.string().min(1),
+  nextOrderDate: z.string().min(1).nullable(),
   pauseUntil: z.string().min(1).nullable(),
   createdAt: z.string().min(1),
 });

@@ -10,6 +10,16 @@ export function SubscriptionList({ subscriptions }: { subscriptions: Subscriptio
             <div className="text-sm opacity-70 capitalize">{s.status}</div>
           </div>
           <div className="mt-2 text-sm opacity-70">
+            Next order creation:{" "}
+            {s.nextOrderDate
+              ? new Date(s.nextOrderDate).toLocaleDateString(undefined, {
+                  year: "numeric",
+                  month: "short",
+                  day: "2-digit",
+                })
+              : "—"}
+          </div>
+          <div className="mt-2 text-sm opacity-70">
             Next delivery:{" "}
             {new Date(s.nextDeliveryDate).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" })}
           </div>

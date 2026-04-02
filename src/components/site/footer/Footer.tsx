@@ -6,14 +6,13 @@ export default function Footer({ locale = "en" }: { locale?: Locale }) {
   const m = getMessages(locale);
 
   return (
-    <footer className="mt-16 w-full h-[50vh]">
+    <footer className="mt-16 w-full bg-foreground text-background">
       <div
-        className="relative bg-contain bg-center flex items-center justify-center h-full"
-        style={{ backgroundImage: "url('/images/footer_bg.png')" }}
+        className="relative flex min-h-[50vh] items-center justify-center bg-foreground bg-none bg-contain bg-center md:bg-[url('/images/footer_bg.png')]"
       >
-        <div className="absolute inset-0 bg-black/20" aria-hidden="true" />
+        <div className="absolute inset-0 bg-foreground/30 md:bg-black/20" aria-hidden="true" />
 
-        <div className="relative container w-full px-4 pt-20">
+        <div className="relative container w-full px-4 py-16 md:py-20">
           <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
             <FooterColumn title={m.footer.quickLinks}>
               <ul className="space-y-2">
@@ -52,7 +51,7 @@ export default function Footer({ locale = "en" }: { locale?: Locale }) {
             </FooterColumn>
           </div>
 
-          <div className="mt-10 text-center text-xs text-neutral-200/80">
+          <div className="mt-10 text-center text-xs text-background/70">
             {m.footer.copyright}
           </div>
         </div>

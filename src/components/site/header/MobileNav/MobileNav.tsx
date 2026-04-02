@@ -37,7 +37,10 @@ export default function MobileNav({
       <button
         type="button"
         aria-label="Open navigation menu"
-        className="relative z-50 inline-flex items-center justify-center rounded-md p-2 text-black/80 hover:bg-black/5 md:hidden"
+        className={[
+          "relative z-50 inline-flex items-center justify-center rounded-md p-2 text-black/80 hover:bg-black/5 md:hidden",
+          open ? "invisible pointer-events-none" : "",
+        ].join(" ")}
         onClick={() => setOpen(true)}
       >
         <span className="sr-only">Menu</span>

@@ -39,6 +39,7 @@ export default function Header({ auth }: { auth: ShellAuthState }) {
         return;
       }
       toast.success(messages.auth.toastLogoutSuccess);
+      router.push(withLocalePath(locale, "/"));
       router.refresh();
     } catch {
       toast.error(messages.auth.errorGeneric);
