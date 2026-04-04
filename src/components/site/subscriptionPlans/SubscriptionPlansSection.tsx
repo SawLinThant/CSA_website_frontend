@@ -19,19 +19,19 @@ const PLANS: readonly {
     id: "vegetable",
     variant: "white",
     badge: "active",
-    image: "/images/subscriptions/organic-vegetables.svg",
+    image: "https://hyttogquyukmgowygxfe.supabase.co/storage/v1/object/public/csa_storage/boxes/plan1.png",
   },
   {
     id: "fruit",
     variant: "mint",
-    badge: "save",
-    image: "/images/subscriptions/fresh-fruits.svg",
+    badge: "active",
+    image: "https://hyttogquyukmgowygxfe.supabase.co/storage/v1/object/public/csa_storage/boxes/plan2.png",
   },
   {
     id: "seasonal",
     variant: "peach",
     badge: "popular",
-    image: "/images/subscriptions/seasonal-grains.svg",
+    image: "https://hyttogquyukmgowygxfe.supabase.co/storage/v1/object/public/csa_storage/boxes/plan3.png",
   },
 ];
 

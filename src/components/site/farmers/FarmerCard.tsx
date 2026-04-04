@@ -1,10 +1,14 @@
 import Image from "next/image";
 
+const PLACEHOLDER_AVATAR = "/images/farmers/avatar-placeholder.svg";
+
 export type FarmerProfile = {
   id: string;
   name: string;
   farm: string;
   location: string;
+  /** Public URL (e.g. CDN) or site path under /public — shown in the circular avatar */
+  imageUrl?: string;
 };
 
 type FarmerCardProps = {
@@ -23,6 +27,9 @@ export default function FarmerCard({
   isVisible,
   animationDelayMs,
 }: FarmerCardProps) {
+  const imageSrc = farmer.imageUrl?.trim() || PLACEHOLDER_AVATAR;
+  const usePlaceholder = imageSrc === PLACEHOLDER_AVATAR;
+
   return (
     <article
       className={`flex w-38 flex-col items-center text-center transition-all duration-700 ease-out sm:w-40 ${
@@ -33,17 +40,20 @@ export default function FarmerCard({
       <div className="mb-3 shrink-0 rounded-full border-4 border-[#4CAF50] bg-white p-1 shadow-sm">
         <div
           className="relative h-22 w-22 overflow-hidden rounded-full sm:h-24 sm:w-24"
-          style={{
-            filter: `hue-rotate(${hueIndex * HUE_STEP_DEG}deg) saturate(1.08)`,
-          }}
+          style={
+            usePlaceholder
+              ? { filter: `hue-rotate(${hueIndex * HUE_STEP_DEG}deg) saturate(1.08)` }
+              : undefined
+          }
         >
           <Image
-            src="/images/farmers/avatar-placeholder.svg"
-            alt=""
+            src={imageSrc}
+            alt={farmer.name}
             width={120}
             height={120}
             className="h-full w-full object-cover"
-            unoptimized
+            sizes="(min-width: 640px) 96px, 88px"
+            unoptimized={usePlaceholder}
           />
         </div>
       </div>

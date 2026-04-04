@@ -158,56 +158,198 @@ export const enMessages = {
         name: "U Aung Min",
         farm: "Golden Paddy Farm",
         location: "Mandalay",
+        imageUrl:
+          "https://hyttogquyukmgowygxfe.supabase.co/storage/v1/object/public/csa_storage/users/f1.jpg",
       },
       {
         id: "2",
         name: "Daw Su Su Aye",
         farm: "Shwe Farm",
         location: "Bago",
+        imageUrl:
+          "https://hyttogquyukmgowygxfe.supabase.co/storage/v1/object/public/csa_storage/users/f2.jpg",
       },
       {
         id: "3",
         name: "U Than Oo",
         farm: "Ayeyar Harvest Farm",
         location: "Pathein",
+        imageUrl:
+          "https://hyttogquyukmgowygxfe.supabase.co/storage/v1/object/public/csa_storage/users/f3.jpg",
       },
       {
         id: "4",
         name: "Ko Kyaw Lin",
         farm: "Green Delta Farm",
         location: "Taunggyi",
+        imageUrl:
+          "https://hyttogquyukmgowygxfe.supabase.co/storage/v1/object/public/csa_storage/users/f4.jpg",
       },
       {
         id: "5",
         name: "U Nay Lin",
         farm: "Thanlwin Valley Farm",
         location: "Pyay",
+        imageUrl:
+          "https://hyttogquyukmgowygxfe.supabase.co/storage/v1/object/public/csa_storage/users/f6.jpg",
       },
       {
         id: "6",
         name: "Ma Hla Myint",
         farm: "Sunrise Farm",
         location: "Myitkyina",
+        imageUrl:
+          "https://hyttogquyukmgowygxfe.supabase.co/storage/v1/object/public/csa_storage/users/f5.jpg",
       },
       {
         id: "7",
         name: "Ko Min Khant",
         farm: "Myitta Organic Farm",
         location: "Monywa",
+        imageUrl:
+          "https://hyttogquyukmgowygxfe.supabase.co/storage/v1/object/public/csa_storage/users/f7.jpg",
       },
       {
         id: "8",
         name: "U Zaw Tun",
         farm: "Pyone Pyae Farm",
         location: "Magway",
+        imageUrl:
+          "https://hyttogquyukmgowygxfe.supabase.co/storage/v1/object/public/csa_storage/users/f9.jpg",
       },
       {
         id: "9",
         name: "Ma Thandar Win",
         farm: "Hnin Si Farm",
         location: "Hpa-An",
+        imageUrl:
+          "https://hyttogquyukmgowygxfe.supabase.co/storage/v1/object/public/csa_storage/users/f8.jpg",
       },
     ],
+  },
+  aboutUs: {
+    meta: {
+      title: "About Us | FreshRoot",
+      description:
+        "Learn how FreshRoot connects you with local farms, our mission, impact, and how farm-fresh subscription boxes work.",
+    },
+    hero: {
+      eyebrow: "OUR ROOTS",
+      title: "About Fresh Root",
+      body:
+        "We believe that everyone deserves access to real, honest food. Fresh Root connects you directly with the soil, bringing the season's best harvests straight to your doorstep without the middlemen.",
+      badge: "Certified Organic Since 2018",
+      ctaPrimary: "Explore Boxes",
+      ctaSecondary: "Our Story",
+      footnote:
+        "* Note: Items may vary weekly depending on harvest conditions and peak ripeness.",
+      imageAlt: "Tall green crops growing in a sunlit field",
+    },
+    mission: {
+      id: "mission",
+      title: "Our Mission & Values",
+      body:
+        "At Fresh Root, our mission is to cultivate a healthier world by bridging the gap between local sustainable farms and your kitchen table. We prioritize the planet and our people in every seed we plant and every box we pack.",
+      bullets: [
+        "Direct-from-farm sourcing",
+        "Zero-waste packaging goals",
+        "Fair wages for field teams",
+      ],
+      cards: {
+        freshQuality: {
+          title: "Fresh Quality",
+          description:
+            "We only harvest at peak ripeness. Our produce often goes from field to doorstep in less than 24 hours.",
+        },
+        supportLocal: {
+          title: "Support Local Farmers",
+          description:
+            "By skipping the supermarket, more profit goes directly back to the independent farmers in our community.",
+        },
+        sustainable: {
+          title: "Sustainable Farming",
+          description:
+            "We employ regenerative practices that restore soil health and preserve our local ecosystems for generations.",
+        },
+        cta: {
+          title: "Join the movement for a greener future.",
+        },
+      },
+    },
+    impact: {
+      stats: [
+        { value: "250,000+", label: "BOXES DELIVERED" },
+        { value: "42", label: "LOCAL FARM PARTNERS" },
+        { value: "15k lbs", label: "PRODUCE DONATED" },
+        { value: "12", label: "CITIES SERVED" },
+      ],
+    },
+    process: {
+      title: "Simple, Fresh, Direct",
+      subtitle:
+        "Getting farm-fresh produce shouldn't be a chore. We've streamlined the process to make healthy eating effortless.",
+      steps: [
+        {
+          title: "Choose Your Box",
+          description:
+            "Select from our curated seasonal sizes. Whether you're a solo chef or feeding a family, we have the perfect fit.",
+        },
+        {
+          title: "Customize (Optional)",
+          description:
+            "Each week, swap out items you don't need for more of what you love. Total control over your pantry.",
+        },
+        {
+          title: "Doorstep Delivery",
+          description:
+            "Our climate-controlled fleet delivers your harvest on your chosen day. No need to be home for delivery.",
+        },
+      ],
+      footerLink: "Learn how subscriptions work",
+    },
+    faq: {
+      title: "Got Questions? We've Got Answers.",
+      subtitle:
+        "Find out everything you need to know about joining the Fresh Root family.",
+      items: [
+        {
+          q: "How do subscriptions work?",
+          a: "Pick a plan that fits your household, choose delivery preferences, and receive a curated box on your schedule. You can pause or adjust anytime before your next billing cycle.",
+        },
+        {
+          q: "Can I change my box or delivery frequency?",
+          a: "Yes. Update box size, swap eligible items when available, and change weekly or monthly frequency from your account before the weekly cutoff.",
+        },
+        {
+          q: "Why do items change each week?",
+          a: "Nature doesn't follow a rigid schedule; we harvest what is at its peak ripeness and nutritional value each morning to ensure you receive only the finest seasonal produce. This ensures you get maximum flavor and health benefits.",
+        },
+        {
+          q: "How is delivery handled?",
+          a: "We route deliveries through our partner network with temperature-aware handling where needed. You'll receive tracking and delivery window details by SMS or email.",
+        },
+        {
+          q: "What is your refund policy?",
+          a: "If something arrives damaged or below our quality standard, contact support within 24 hours of delivery with a photo — we'll make it right with a credit or replacement when applicable.",
+        },
+        {
+          q: "Do you offer organic options?",
+          a: "Many boxes include organic or certified growers where available. Availability is seasonal — check product labels in your box each week.",
+        },
+      ],
+    },
+    newsletter: {
+      label: "Newsletter",
+      title: "Get farm-fresh updates",
+      description:
+        "Join 12,000+ neighbors who receive weekly harvest alerts, seasonal recipes, and exclusive grower stories.",
+      placeholder: "Enter your email address",
+      submit: "Subscribe",
+      trustNoSpam: "No spam ever",
+      trustUnsubscribe: "Unsubscribe anytime",
+      toastThanks: "Thanks — you're on the list.",
+      imageAlt: "Fresh vegetables in a basket on a farm table",
+    },
   },
   auth: {
     loginTitle: "Welcome Back",

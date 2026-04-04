@@ -81,13 +81,14 @@ export default function MobileNav({
                   {messages.farmer.navDashboard}
                 </Link>
               ) : (
-                <Link
-                  href={withLocalePath(locale, "/farmer-portal/login")}
-                  onClick={() => setOpen(false)}
-                  className="w-full rounded-[10px] border border-primary/30 py-2.5 text-center text-sm font-medium text-primary"
-                >
-                  {messages.farmer.navDashboard}
-                </Link>
+                <></>
+                // <Link
+                //   href={withLocalePath(locale, "/farmer-portal/login")}
+                //   onClick={() => setOpen(false)}
+                //   className="w-full rounded-[10px] border border-primary/30 py-2.5 text-center text-sm font-medium text-primary"
+                // >
+                //   {messages.farmer.navDashboard}
+                // </Link>
               )}
               {isLoggedIn ? (
                 <>
