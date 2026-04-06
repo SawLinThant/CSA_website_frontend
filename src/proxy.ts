@@ -69,6 +69,28 @@ function applyCookieOps(res: NextResponse, ops: CookieOp[]) {
   }
 }
 
+/** Per-request CSP nonce so `script-src` can stay strict (no `'unsafe-inline'`). */
+function createNonce(): string {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  let binary = "";
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]!);
+  return btoa(binary);
+}
+
+function buildCsp(nonce: string): string {
+  return [
+    "default-src 'self'",
+    "img-src 'self' data: https:",
+    "style-src 'self' 'unsafe-inline'",
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+    "connect-src 'self' https: http:",
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ].join("; ");
+}
+
 async function computeSessionRefreshOps(request: NextRequest): Promise<CookieOp[]> {
   const ACCESS = envAccessName();
   const REFRESH = envRefreshName();
@@ -143,19 +165,36 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  const nonce = process.env.NODE_ENV === "production" ? createNonce() : null;
+  const requestHeaders = new Headers(request.headers);
+  if (nonce) {
+    requestHeaders.set("x-nonce", nonce);
+  }
+
+  const withCsp = (res: NextResponse) => {
+    if (nonce) {
+      res.headers.set("Content-Security-Policy", buildCsp(nonce));
+    }
+    return res;
+  };
+
   const cookieOps = await computeSessionRefreshOps(request);
 
   if (pathname.startsWith("/api")) {
-    const res = NextResponse.next();
+    const res = NextResponse.next(
+      nonce ? { request: { headers: requestHeaders } } : undefined,
+    );
     applyCookieOps(res, cookieOps);
     return res;
   }
 
   const firstSegment = pathname.split("/").filter(Boolean)[0];
   if (firstSegment && isLocale(firstSegment)) {
-    const res = NextResponse.next();
+    const res = NextResponse.next(
+      nonce ? { request: { headers: requestHeaders } } : undefined,
+    );
     applyCookieOps(res, cookieOps);
-    return res;
+    return withCsp(res);
   }
 
   const url = request.nextUrl.clone();

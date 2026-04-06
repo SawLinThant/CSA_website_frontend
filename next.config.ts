@@ -20,23 +20,7 @@ const nextConfig: NextConfig = {
     ],
   },
   async headers() {
-    const csp = [
-      "default-src 'self'",
-      // Allow images from your backend/CDN (and data URIs for Next/image placeholders).
-      "img-src 'self' data: https:",
-      // Next + Tailwind typically require inline styles for some generated CSS.
-      "style-src 'self' 'unsafe-inline'",
-      // Scripts are only from self (Next serves hashed bundles from self).
-      "script-src 'self'",
-      // Backend calls for SSR.
-      "connect-src 'self' https: http:",
-      // Prevent clickjacking.
-      "frame-ancestors 'none'",
-      // Keep the rest tight.
-      "base-uri 'self'",
-      "form-action 'self'",
-    ].join("; ");
-
+    // CSP is set per-request in `src/middleware.ts` (nonce + strict-dynamic) so Next.js inline scripts work.
     const commonHeaders = [
       { key: "X-Content-Type-Options", value: "nosniff" },
       { key: "X-Frame-Options", value: "DENY" },
@@ -50,20 +34,10 @@ const nextConfig: NextConfig = {
       { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
     ];
 
-    // Next.js dev mode uses inline scripts for dev overlays/HMR. CSP in dev commonly breaks reload/HMR.
-    if (process.env.NODE_ENV !== "production") {
-      return [
-        {
-          source: "/(.*)",
-          headers: commonHeaders,
-        },
-      ];
-    }
-
     return [
       {
         source: "/(.*)",
-        headers: [...commonHeaders, { key: "Content-Security-Policy", value: csp }],
+        headers: commonHeaders,
       },
     ];
   },
