@@ -79,9 +79,9 @@ export default function CustomerOrderDetailClient({ locale, orderId }: Props) {
     void load();
   }, [load]);
 
-  const ordersPath = withLocalePath(locale, "/orders");
+  const ordersPath = withLocalePath(locale, "/customer/orders");
   const subscriptionHref = order?.subscription
-    ? withLocalePath(locale, `/subscriptions/${order.subscription.id}`)
+    ? withLocalePath(locale, `/customer/my-subscriptions/${order.subscription.id}`)
     : null;
 
   const exportJson = () => {

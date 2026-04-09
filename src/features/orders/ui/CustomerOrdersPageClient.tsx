@@ -182,7 +182,7 @@ export default function CustomerOrdersPageClient({ locale }: { locale: Locale })
     setPage(1);
   };
 
-  const ordersPath = withLocalePath(locale, "/orders");
+  const ordersPath = withLocalePath(locale, "/customer/orders");
 
   return (
     <div className="mx-auto w-full max-w-6xl py-8">
