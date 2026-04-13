@@ -2,12 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { toast } from "sonner";
 import { formatMoneyAmount } from "@/lib/format/money";
 import { getLocaleFromPathname, type Locale, withLocalePath } from "@/i18n/config";
-import CustomerSubscribeNowButton from "@/components/customer/CustomerSubscribeNowButton";
 
 type Item = {
   box: {
@@ -18,7 +17,6 @@ type Item = {
   };
   minPrice: number;
   frequencyBadge: "weekly" | "monthly" | null;
-  subscribePlanId: string;
   isNew: boolean;
 };
 
@@ -29,6 +27,27 @@ type ApiResponse = {
   limit: number;
   hasMore: boolean;
 };
+
+const BANNER_SLIDES = [
+  {
+    image: "/images/subscriptions/fresh-fruits.svg",
+    badge: "Summer Harvest",
+    title: "Curated boxes of seasonal goodness.",
+    subtitle: "Farm-to-table freshness delivered to your door. Skip anytime.",
+  },
+  {
+    image: "/images/subscriptions/organic-vegetables.svg",
+    badge: "Organic Picks",
+    title: "Straight from local farms.",
+    subtitle: "Handpicked produce plans for healthy meals every week.",
+  },
+  {
+    image: "/images/subscriptions/seasonal-grains.svg",
+    badge: "Pantry Staples",
+    title: "For your everyday cooking.",
+    subtitle: "Balanced subscriptions that match your family routine.",
+  },
+] as const;
 
 function isApiResponse(value: unknown): value is ApiResponse {
   if (!value || typeof value !== "object") return false;
@@ -58,23 +77,21 @@ function Badge({ children, tone }: { children: React.ReactNode; tone: "green" | 
 
 export default function CustomerSubscriptionsClient({
   initial,
-  authRole,
 }: {
   initial: ApiResponse;
-  authRole: "guest" | "customer" | "farmer" | "admin";
 }) {
   const pathname = usePathname();
   const locale = getLocaleFromPathname(pathname) as Locale;
 
   const [items, setItems] = useState<Item[]>(initial.items);
-  const [total, setTotal] = useState(initial.total);
   const [page, setPage] = useState(initial.page);
   const [hasMore, setHasMore] = useState(initial.hasMore);
   const [loading, setLoading] = useState(false);
+  const [activeBanner, setActiveBanner] = useState(0);
 
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
-  const resultsLabel = useMemo(() => `${total} Results`, [total]);
+  const resultsLabel = `${items.length} Results`;
 
   async function loadNext() {
     if (loading || !hasMore) return;
@@ -99,7 +116,6 @@ export default function CustomerSubscriptionsClient({
       }
       const data = json;
       setItems((prev) => [...prev, ...data.items]);
-      setTotal(data.total);
       setPage(data.page);
       setHasMore(data.hasMore);
     } catch {
@@ -124,30 +140,51 @@ export default function CustomerSubscriptionsClient({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sentinelRef.current, hasMore, page, loading]);
 
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setActiveBanner((prev) => (prev + 1) % BANNER_SLIDES.length);
+    }, 4500);
+    return () => window.clearInterval(timer);
+  }, []);
+
   return (
     <main className="w-full">
       <section className="mb-4">
         <div className="overflow-hidden rounded-[18px] border border-black/10 bg-white shadow-sm">
           <div className="relative h-44 w-full">
-            <Image
-              src="/images/subscriptions/fresh-fruits.svg"
-              alt=""
-              fill
-              className="object-cover"
-              sizes="100vw"
-              priority
-            />
+            {BANNER_SLIDES.map((slide, index) => (
+              <Image
+                key={slide.image}
+                src={slide.image}
+                alt={slide.title}
+                fill
+                className={`object-cover transition-opacity duration-700 ${activeBanner === index ? "opacity-100" : "opacity-0"}`}
+                sizes="100vw"
+                priority={index === 0}
+              />
+            ))}
             <div className="absolute inset-0 bg-linear-to-r from-black/55 via-black/25 to-transparent" />
             <div className="absolute inset-x-4 top-4">
-              <Badge tone="green">Summer Harvest</Badge>
+              <Badge tone="green">{BANNER_SLIDES[activeBanner]?.badge}</Badge>
             </div>
             <div className="absolute inset-x-4 bottom-4 text-white">
               <h1 className="text-balance text-3xl font-extrabold leading-tight">
-                Curated boxes of <span className="italic">seasonal</span> goodness.
+                {BANNER_SLIDES[activeBanner]?.title}
               </h1>
               <p className="mt-2 text-sm text-white/90">
-                Farm-to-table freshness delivered to your door. Skip anytime.
+                {BANNER_SLIDES[activeBanner]?.subtitle}
               </p>
+            </div>
+            <div className="absolute bottom-3 right-4 z-10 flex items-center gap-1.5">
+              {BANNER_SLIDES.map((slide, index) => (
+                <button
+                  key={`${slide.image}-dot`}
+                  type="button"
+                  aria-label={`Go to banner ${index + 1}`}
+                  onClick={() => setActiveBanner(index)}
+                  className={`h-2 rounded-full transition-all ${activeBanner === index ? "w-5 bg-white" : "w-2 bg-white/60"}`}
+                />
+              ))}
             </div>
           </div>
         </div>
@@ -164,7 +201,7 @@ export default function CustomerSubscriptionsClient({
           href={withLocalePath(locale, "/customer/subscriptions")}
           className="text-sm font-semibold text-[#2F6B2F]"
         >
-          See All →
+          
         </Link>
       </section>
 
@@ -207,7 +244,6 @@ export default function CustomerSubscriptionsClient({
                 View Detail
               </Link>
 
-              <CustomerSubscribeNowButton authRole={authRole} planId={it.subscribePlanId} />
             </div>
           </article>
         ))}

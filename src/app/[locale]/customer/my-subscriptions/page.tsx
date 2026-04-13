@@ -2,8 +2,10 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { listMySubscriptionsQuerySchema, type ListMySubscriptionsQuery } from "@/features/subscriptions/domain/schemas";
 import { listMySubscriptionsUseCase } from "@/features/subscriptions/application/useCases/listMySubscriptions";
+import { listPublicSubscriptionPlansUseCase } from "@/features/subscriptions/application/useCases/listPublicSubscriptionPlans";
 import { SubscriptionList } from "@/features/subscriptions/ui/SubscriptionList";
 import { isLocale, type Locale, withLocalePath } from "@/i18n/config";
+import { isBackendRequestError } from "@/lib/server/backendClient";
 
 function normalizeSearchParams(searchParams: Record<string, string | string[] | undefined>) {
   const pick = (key: string) => (Array.isArray(searchParams[key]) ? searchParams[key]?.[0] : searchParams[key]);
@@ -37,9 +39,14 @@ export default async function CustomerMySubscriptionsPage({
   let result: Awaited<ReturnType<typeof listMySubscriptionsUseCase>>;
   try {
     result = await listMySubscriptionsUseCase(query);
-  } catch {
-    redirect(withLocalePath(locale, "/customer/login"));
+  } catch (error) {
+    if (isBackendRequestError(error) && (error.status === 401 || error.status === 403)) {
+      redirect(withLocalePath(locale, "/customer/login"));
+    }
+    throw error;
   }
+  const plans = await listPublicSubscriptionPlansUseCase({ page: 1, limit: 100, active: true }).catch(() => null);
+  const planNamesById = Object.fromEntries((plans?.items ?? []).map((plan) => [plan.id, plan.name]));
 
   return (
     <main className="rounded-2xl border border-black/10 bg-white p-5 shadow-sm">
@@ -54,7 +61,7 @@ export default async function CustomerMySubscriptionsPage({
       </div>
 
       <div className="mt-5">
-        <SubscriptionList subscriptions={result.items} />
+        <SubscriptionList subscriptions={result.items} planNamesById={planNamesById} />
       </div>
     </main>
   );

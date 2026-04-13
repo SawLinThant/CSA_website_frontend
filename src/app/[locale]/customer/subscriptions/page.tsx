@@ -3,8 +3,7 @@ import { publicListBoxesQuerySchema } from "@/features/boxes/domain/schemas";
 import { listPublicBoxesUseCase } from "@/features/boxes/application/useCases/listPublicBoxes";
 import { publicListSubscriptionPlansQuerySchema } from "@/features/subscriptions/domain/schemas";
 import { listPublicSubscriptionPlansUseCase } from "@/features/subscriptions/application/useCases/listPublicSubscriptionPlans";
-import { getShellAuthState } from "@/lib/server/getShellAuthState";
-import { isLocale, type Locale } from "@/i18n/config";
+import { isLocale } from "@/i18n/config";
 import CustomerSubscriptionsClient from "./CustomerSubscriptionsClient";
 
 export default async function CustomerSubscriptionBoxesPage({
@@ -14,10 +13,6 @@ export default async function CustomerSubscriptionBoxesPage({
 }) {
   const { locale: loc } = await params;
   if (!isLocale(loc)) notFound();
-  const locale = loc as Locale;
-
-  const auth = await getShellAuthState();
-  const authRole = auth.status === "authenticated" ? auth.user.role : "guest";
 
   const boxQuery = publicListBoxesQuerySchema.parse({
     page: 1,
@@ -51,15 +46,13 @@ export default async function CustomerSubscriptionBoxesPage({
         box,
         minPrice,
         frequencyBadge: cheapest?.deliveryFrequency ?? null,
-        subscribePlanId: cheapest?.id ?? null,
         isNew: idx < 1,
       };
     })
-    .filter((x) => x.minPrice != null && x.subscribePlanId != null) as Array<{
+    .filter((x) => x.minPrice != null) as Array<{
     box: (typeof boxesResult.items)[number];
     minPrice: number;
     frequencyBadge: "weekly" | "monthly" | null;
-    subscribePlanId: string;
     isNew: boolean;
   }>;
 
@@ -74,7 +67,6 @@ export default async function CustomerSubscriptionBoxesPage({
         limit: boxesResult.limit,
         hasMore,
       }}
-      authRole={authRole}
     />
   );
 }

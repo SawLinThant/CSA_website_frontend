@@ -46,11 +46,10 @@ export async function GET(req: Request) {
         box,
         minPrice,
         frequencyBadge: cheapest?.deliveryFrequency ?? null,
-        subscribePlanId: cheapest?.id ?? null,
         isNew: idx < 1 && page === 1,
       };
     })
-    .filter((x) => x.minPrice != null && x.subscribePlanId != null);
+    .filter((x) => x.minPrice != null);
 
   const hasMore = page * limit < boxesResult.total;
 

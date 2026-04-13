@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import { startTransition, useActionState, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { CheckCircle2, Home, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import type { Locale } from "@/i18n/config";
+import { type Locale, withLocalePath } from "@/i18n/config";
 import {
   deleteCustomerAddressAction,
   saveCustomerAddressAction,
@@ -117,6 +118,7 @@ export default function CustomerProfilePageClient({
   profile: CustomerProfileResponse;
   addresses: CustomerAddress[];
 }) {
+  const router = useRouter();
   const [profileState, profileAction, profilePending] = useActionState(updateCustomerProfileAction, initialState);
   const [addressState, addressAction, addressPending] = useActionState(saveCustomerAddressAction, initialState);
   const [editing, setEditing] = useState<CustomerAddress | null>(null);
@@ -161,6 +163,21 @@ export default function CustomerProfilePageClient({
     startTransition(() => {
       addressAction(formData);
     });
+  }
+
+  async function onLogout() {
+    try {
+      const res = await fetch("/api/auth/logout", { method: "POST" });
+      if (!res.ok) {
+        toast.error("Failed to logout. Please try again.");
+        return;
+      }
+      toast.success("Logged out successfully.");
+      router.replace(withLocalePath(locale, "/customer/login"));
+      router.refresh();
+    } catch {
+      toast.error("Failed to logout. Please try again.");
+    }
   }
 
   return (
@@ -247,6 +264,13 @@ export default function CustomerProfilePageClient({
                 className="mt-5 w-full rounded-xl bg-[#54b531] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#4aa12c] disabled:opacity-70"
               >
                 {profilePending ? "Saving..." : "Save Profile Changes"}
+              </button>
+              <button
+                type="button"
+                onClick={() => void onLogout()}
+                className="mt-3 w-full rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-100"
+              >
+                Logout
               </button>
             </div>
           </form>

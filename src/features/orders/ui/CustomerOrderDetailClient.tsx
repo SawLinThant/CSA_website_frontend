@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 import {
   ArrowLeft,
@@ -48,6 +49,7 @@ type Props = {
 };
 
 export default function CustomerOrderDetailClient({ locale, orderId }: Props) {
+  const router = useRouter();
   const [order, setOrder] = useState<CustomerOrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -60,6 +62,10 @@ export default function CustomerOrderDetailClient({ locale, orderId }: Props) {
         method: "GET",
         credentials: "include",
       });
+      if (res.status === 401) {
+        router.replace(withLocalePath(locale, "/customer/login"));
+        return;
+      }
       const json = (await res.json()) as unknown;
       if (!res.ok) {
         const err = json as { error?: string };
@@ -73,7 +79,7 @@ export default function CustomerOrderDetailClient({ locale, orderId }: Props) {
     } finally {
       setLoading(false);
     }
-  }, [orderId]);
+  }, [locale, orderId, router]);
 
   useEffect(() => {
     void load();

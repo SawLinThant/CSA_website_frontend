@@ -2,6 +2,7 @@ import { z } from "zod";
 import { redirect } from "next/navigation";
 import { getMySubscriptionUseCase } from "@/features/subscriptions/application/useCases/getMySubscription";
 import { isLocale, type Locale, withLocalePath } from "@/i18n/config";
+import { isBackendRequestError } from "@/lib/server/backendClient";
 
 export default async function CustomerMySubscriptionDetailsPage({
   params,
@@ -17,8 +18,11 @@ export default async function CustomerMySubscriptionDetailsPage({
   let s: Awaited<ReturnType<typeof getMySubscriptionUseCase>>;
   try {
     s = await getMySubscriptionUseCase(id);
-  } catch {
-    redirect(withLocalePath(locale, "/customer/login"));
+  } catch (error) {
+    if (isBackendRequestError(error) && (error.status === 401 || error.status === 403)) {
+      redirect(withLocalePath(locale, "/customer/login"));
+    }
+    throw error;
   }
 
   return (

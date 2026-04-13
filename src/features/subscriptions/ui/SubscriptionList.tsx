@@ -1,12 +1,18 @@
 import type { Subscription } from "../domain/schemas";
 
-export function SubscriptionList({ subscriptions }: { subscriptions: Subscription[] }) {
+export function SubscriptionList({
+  subscriptions,
+  planNamesById,
+}: {
+  subscriptions: Subscription[];
+  planNamesById?: Record<string, string>;
+}) {
   return (
     <div className="space-y-3">
       {subscriptions.map((s) => (
         <div key={s.id} className="rounded-lg border border-black/10 p-4">
           <div className="flex items-center justify-between gap-3">
-            <div className="font-semibold">Plan: {s.planId}</div>
+            <div className="font-semibold">Plan: {planNamesById?.[s.planId] ?? s.planId}</div>
             <div className="text-sm opacity-70 capitalize">{s.status}</div>
           </div>
           <div className="mt-2 text-sm opacity-70">

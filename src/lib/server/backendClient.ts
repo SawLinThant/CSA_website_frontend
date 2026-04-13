@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { env } from "./env";
-import { getAccessToken } from "./authSession";
+import { forceRefreshAccessToken, getAccessToken } from "./authSession";
 
 export type ApiErrorPayload = {
   error?: string;
@@ -131,9 +131,17 @@ export async function backendRequestJson<TResponse>(
     accessToken = await getAccessToken();
   }
 
-  const response = await doRequest(accessToken);
+  let response = await doRequest(accessToken);
+  let json = await parseJsonSafe<unknown>(response);
 
-  const json = await parseJsonSafe<unknown>(response);
+  // Fallback safety net: if a protected request still hits 401, refresh once and retry once.
+  if (options.requiresAuth && response.status === 401) {
+    const refreshedAccessToken = await forceRefreshAccessToken();
+    if (refreshedAccessToken) {
+      response = await doRequest(refreshedAccessToken);
+      json = await parseJsonSafe<unknown>(response);
+    }
+  }
 
   if (!response.ok) {
     throwBackendError(path, response, json);
@@ -213,7 +221,14 @@ export async function backendDeleteNoContent(
     });
   }
 
-  const response = await doRequest(accessToken);
+  let response = await doRequest(accessToken);
+
+  if ((options?.requiresAuth ?? true) && response.status === 401) {
+    const refreshedAccessToken = await forceRefreshAccessToken();
+    if (refreshedAccessToken) {
+      response = await doRequest(refreshedAccessToken);
+    }
+  }
 
   if (response.status === 204) {
     return;

@@ -5,7 +5,6 @@ import { defaultLocale, isLocale } from "./i18n/config";
 const PUBLIC_FILE = /\.[^/]+$/;
 
 const ACCESS_MAX_AGE = 60 * 15;
-const REFRESH_MAX_AGE = 60 * 60 * 24 * 7;
 const REFRESH_SKEW_SECONDS = 60;
 
 function envAccessName() {
@@ -14,6 +13,10 @@ function envAccessName() {
 
 function envRefreshName() {
   return process.env.AUTH_REFRESH_TOKEN_COOKIE_NAME ?? "refreshToken";
+}
+
+function envRememberMeName() {
+  return process.env.AUTH_REMEMBER_ME_COOKIE_NAME ?? "rememberMe";
 }
 
 function apiBaseUrl() {
@@ -55,7 +58,7 @@ type CookieOp =
         path: string;
         secure: boolean;
         sameSite: "lax" | "strict" | "none";
-        maxAge: number;
+        maxAge?: number;
       };
     };
 
@@ -94,8 +97,10 @@ function buildCsp(nonce: string): string {
 async function computeSessionRefreshOps(request: NextRequest): Promise<CookieOp[]> {
   const ACCESS = envAccessName();
   const REFRESH = envRefreshName();
+  const REMEMBER_ME = envRememberMeName();
   const refresh = request.cookies.get(REFRESH)?.value;
   if (!refresh) return [];
+  const rememberMe = request.cookies.get(REMEMBER_ME)?.value !== "0";
 
   const access = request.cookies.get(ACCESS)?.value;
   const now = Math.floor(Date.now() / 1000);
@@ -150,7 +155,13 @@ async function computeSessionRefreshOps(request: NextRequest): Promise<CookieOp[
         kind: "set",
         name: REFRESH,
         value: nextRefresh,
-        options: { ...baseOpts, maxAge: REFRESH_MAX_AGE },
+        options: rememberMe ? { ...baseOpts, maxAge: 60 * 60 * 24 * 7 } : { ...baseOpts },
+      },
+      {
+        kind: "set",
+        name: REMEMBER_ME,
+        value: rememberMe ? "1" : "0",
+        options: rememberMe ? { ...baseOpts, maxAge: 60 * 60 * 24 * 7 } : { ...baseOpts },
       },
     ];
   } catch {

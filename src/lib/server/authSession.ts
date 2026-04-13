@@ -45,6 +45,7 @@ async function deleteCookieValue(name: string) {
 export async function clearAuthCookies() {
   await deleteCookieValue(env.AUTH_ACCESS_TOKEN_COOKIE_NAME);
   await deleteCookieValue(env.AUTH_REFRESH_TOKEN_COOKIE_NAME);
+  await deleteCookieValue(env.AUTH_REMEMBER_ME_COOKIE_NAME);
 }
 
 /** Store tokens from login/register; refresh cookie uses session storage when rememberMe is false. */
@@ -62,6 +63,11 @@ export async function persistAuthTokens(
   await setCookieValue(
     env.AUTH_REFRESH_TOKEN_COOKIE_NAME,
     refreshToken,
+    rememberMe ? AUTH_REFRESH_COOKIE_MAX_AGE_SECONDS : undefined,
+  );
+  await setCookieValue(
+    env.AUTH_REMEMBER_ME_COOKIE_NAME,
+    rememberMe ? "1" : "0",
     rememberMe ? AUTH_REFRESH_COOKIE_MAX_AGE_SECONDS : undefined,
   );
 }
@@ -104,6 +110,7 @@ async function refreshTokensFromBackend(refreshToken: string): Promise<{
  */
 export async function forceRefreshAccessToken(): Promise<string | null> {
   const refreshToken = await getRefreshToken();
+  const rememberMe = (await getCookieValue(env.AUTH_REMEMBER_ME_COOKIE_NAME)) !== "0";
   if (!refreshToken) {
     await clearAuthCookies();
     return null;
@@ -127,7 +134,12 @@ export async function forceRefreshAccessToken(): Promise<string | null> {
   await setCookieValue(
     env.AUTH_REFRESH_TOKEN_COOKIE_NAME,
     nextRefreshToken,
-    AUTH_REFRESH_COOKIE_MAX_AGE_SECONDS,
+    rememberMe ? AUTH_REFRESH_COOKIE_MAX_AGE_SECONDS : undefined,
+  );
+  await setCookieValue(
+    env.AUTH_REMEMBER_ME_COOKIE_NAME,
+    rememberMe ? "1" : "0",
+    rememberMe ? AUTH_REFRESH_COOKIE_MAX_AGE_SECONDS : undefined,
   );
 
   return refreshed.accessToken;

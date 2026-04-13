@@ -87,6 +87,11 @@ export default async function CustomerBoxDetailPage({
 
             <div className="mt-5">
               <CustomerSubscribeNowButton authRole={authRole} planId={activePlan?.id} />
+              {!activePlan ? (
+                <p className="mt-2 text-center text-xs font-medium text-muted-foreground">
+                  No active subscription plan is available for this box right now.
+                </p>
+              ) : null}
               <p className="mt-3 text-center text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
                 Secure checkout powered by RootedPay
               </p>

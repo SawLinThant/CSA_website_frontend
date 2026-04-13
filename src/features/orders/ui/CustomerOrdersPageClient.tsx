@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Calendar,
   ChevronRight,
@@ -34,6 +35,7 @@ import {
 type TabId = "all" | "in_progress" | "delivered" | "flagged";
 
 export default function CustomerOrdersPageClient({ locale }: { locale: Locale }) {
+  const router = useRouter();
   const [tab, setTab] = useState<TabId>("all");
   const [page, setPage] = useState(1);
   const limit = 10;
@@ -102,6 +104,10 @@ export default function CustomerOrdersPageClient({ locale }: { locale: Locale })
         method: "GET",
         credentials: "include",
       });
+      if (res.status === 401) {
+        router.replace(withLocalePath(locale, "/customer/login"));
+        return;
+      }
       const json = (await res.json()) as unknown;
       if (!res.ok) {
         const err = json as { error?: string };
@@ -119,7 +125,7 @@ export default function CustomerOrdersPageClient({ locale }: { locale: Locale })
     } finally {
       setLoading(false);
     }
-  }, [page, tabQuery, dateQuery, searchApplied, sortBy, sortOrder]);
+  }, [dateQuery, locale, page, router, searchApplied, sortBy, sortOrder, tabQuery]);
 
   useEffect(() => {
     void fetchList();
