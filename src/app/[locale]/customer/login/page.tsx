@@ -53,11 +53,11 @@ export default function CustomerLoginPage() {
   }
 
   return (
-    <main className="rounded-2xl border border-black/10 bg-white p-5 shadow-sm">
+    <main className="mx-auto flex h-[90vh] max-w-md flex-col justify-center py-1">
       <h1 className="text-2xl font-semibold">Customer Login</h1>
       <p className="mt-2 text-sm opacity-70">Sign in to manage your subscriptions and orders.</p>
 
-      <form onSubmit={onSubmit} className="mt-6 space-y-4">
+      <form onSubmit={onSubmit} className="mt-6 space-y-4 rounded-xl border bg-card p-5">
         <label className="block">
           <div className="text-sm font-medium">Phone</div>
           <input
@@ -101,12 +101,13 @@ export default function CustomerLoginPage() {
         </button>
       </form>
 
-      <div className="mt-4 text-sm opacity-70">
+      <div className="mt-4 text-center text-sm text-muted-foreground">
         No account?{" "}
         <Link
+        className="font-semibold text-primary hover:underline"
           href={`${withLocalePath(locale, "/customer/register")}?returnTo=${encodeURIComponent(returnTo)}`}
         >
-          Register
+          Register here
         </Link>
       </div>
     </main>

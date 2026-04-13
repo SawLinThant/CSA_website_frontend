@@ -87,26 +87,22 @@ export default function FarmerProductsTable({
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h3 className="text-[26px] font-semibold tracking-tight text-foreground">Active Catalogue</h3>
+          <h3 className="text-2xl font-semibold tracking-tight text-foreground sm:text-[26px]">Active Catalogue</h3>
           <p className="text-sm text-muted-foreground">Your public listings currently visible to buyers.</p>
         </div>
         <div className="flex items-center gap-2">
-          {/* <button
-            type="button"
-            className="rounded-xl border border-border bg-background px-4 py-2 text-xs font-medium text-foreground hover:bg-muted"
-          >
-            Filter
-          </button>
           <button
             type="button"
-            className="rounded-xl border border-border bg-background px-4 py-2 text-xs font-medium text-foreground hover:bg-muted"
+            onClick={openCreateModal}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-semibold hover:bg-muted"
           >
-            Export
-          </button> */}
+            <Plus className="size-3.5" />
+            Add Product
+          </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-4">
         {items.map((p) => {
           const img = primaryImage(p);
           return (
@@ -145,7 +141,7 @@ export default function FarmerProductsTable({
                 </div>
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-sm font-semibold text-emerald-700">{formatMoneyAmount(p.basePrice, locale)}</span>
-                  <div className="flex items-center gap-1.5 opacity-0 transition group-hover:opacity-100">
+                  <div className="flex items-center gap-1.5 opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100">
                     <button
                       type="button"
                       onClick={() => openEditModal(p)}
@@ -168,16 +164,6 @@ export default function FarmerProductsTable({
             </article>
           );
         })}
-        <button
-          type="button"
-          onClick={openCreateModal}
-          className="flex w-full min-h-[250px] flex-col items-center justify-center rounded-2xl border border-dashed border-border/80 bg-card/50 text-muted-foreground transition hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
-        >
-          <span className="mb-3 inline-flex size-12 items-center justify-center rounded-full border border-border bg-background">
-            <Plus className="size-6" />
-          </span>
-          <span className="text-sm font-medium">Add New Product</span>
-        </button>
       </div>
 
       {items.length === 0 ? (
@@ -187,14 +173,14 @@ export default function FarmerProductsTable({
       {modalMode ? (
         <div
           className={[
-            "fixed inset-0 z-50 flex items-center justify-center bg-black/35 px-4 py-8",
+            "fixed inset-0 z-50 flex items-end justify-center bg-black/35 px-0 py-0 sm:items-center sm:px-4 sm:py-8",
             isModalClosing ? "animate-out fade-out duration-200" : "animate-in fade-in duration-200",
           ].join(" ")}
           onClick={closeModal}
         >
           <div
             className={[
-              "w-full max-w-3xl rounded-2xl border border-border bg-background shadow-2xl",
+              "w-full max-w-3xl rounded-t-2xl border border-border bg-background shadow-2xl sm:rounded-2xl",
               isModalClosing ? "animate-out fade-out zoom-out-95 duration-200" : "animate-in fade-in zoom-in-95 duration-200",
             ].join(" ")}
             onClick={(e) => e.stopPropagation()}
@@ -212,7 +198,7 @@ export default function FarmerProductsTable({
                 <X className="size-4" />
               </button>
             </div>
-            <div className="max-h-[78vh] overflow-y-auto p-5">
+            <div className="max-h-[85vh] overflow-y-auto p-4 sm:max-h-[78vh] sm:p-5">
               <ProductEditorForm
                 locale={locale}
                 messages={messages}

@@ -21,7 +21,7 @@ export default function FarmerDashboardSection({
 }) {
   return (
     <section id={id} className={cn("scroll-mt-24", className)}>
-      <div className="rounded-2xl border border-border/80 bg-card p-6 shadow-sm sm:p-8">
+      <div className="rounded-2xl border border-border/80 bg-card p-4 shadow-sm sm:p-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex gap-3">
             <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/12 text-primary">
@@ -34,7 +34,7 @@ export default function FarmerDashboardSection({
           </div>
           {action ? <div className="shrink-0 sm:pt-0.5">{action}</div> : null}
         </div>
-        <div className="mt-8">{children}</div>
+        <div className="mt-5 sm:mt-8">{children}</div>
       </div>
     </section>
   );

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import HarvestEditorForm from "@/features/farmer/ui/harvests/HarvestEditorForm";
 import { getMyHarvest, listMyProducts } from "@/features/farmer/infrastructure/farmerApi";
 import { handleFarmerBackendFailure } from "@/features/farmer/infrastructure/handleFarmerBackendFailure";
+import { requireFarmerAuth } from "@/features/farmer/infrastructure/requireFarmerAuth";
 import { getMessages } from "@/i18n/messages";
 import { isLocale, type Locale } from "@/i18n/config";
 
@@ -15,6 +16,7 @@ export default async function FarmerEditHarvestPage({
     notFound();
   }
   const locale = loc as Locale;
+  await requireFarmerAuth(locale);
   const messages = getMessages(locale).farmer;
 
   let harvest;

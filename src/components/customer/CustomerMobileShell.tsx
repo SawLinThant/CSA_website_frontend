@@ -20,7 +20,7 @@ export default function CustomerMobileShell({ children }: { children: ReactNode 
   const isAuthPage = AUTH_ROUTES.has(barePath);
 
   if (isAuthPage) {
-    return <div className="min-h-screen bg-background px-0 pb-6 pt-5 flex items-center justify-center">{children}</div>;
+    return <div className="min-h-screen bg-muted/20 px-4 py-5">{children}</div>;
   }
 
   return (

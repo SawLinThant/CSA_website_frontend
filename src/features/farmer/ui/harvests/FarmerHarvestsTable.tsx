@@ -97,7 +97,7 @@ export default function FarmerHarvestsTable({
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h3 className="text-[32px] font-semibold tracking-tight text-foreground">Recent Harvests</h3>
+          <h3 className="text-2xl font-semibold tracking-tight text-foreground sm:text-[32px]">Recent Harvests</h3>
           <p className="text-sm text-muted-foreground">Fresh yields waiting to be processed or shipped.</p>
         </div>
         <div className="flex items-center gap-2">
@@ -172,14 +172,14 @@ export default function FarmerHarvestsTable({
       {modalMode ? (
         <div
           className={[
-            "fixed inset-0 z-50 flex items-center justify-center bg-black/35 px-4 py-8",
+            "fixed inset-0 z-50 flex items-end justify-center bg-black/35 px-0 py-0 sm:items-center sm:px-4 sm:py-8",
             isModalClosing ? "animate-out fade-out duration-200" : "animate-in fade-in duration-200",
           ].join(" ")}
           onClick={closeModal}
         >
           <div
             className={[
-              "w-full max-w-3xl rounded-2xl border border-border bg-background shadow-2xl",
+              "w-full max-w-3xl rounded-t-2xl border border-border bg-background shadow-2xl sm:rounded-2xl",
               isModalClosing ? "animate-out fade-out zoom-out-95 duration-200" : "animate-in fade-in zoom-in-95 duration-200",
             ].join(" ")}
             onClick={(e) => e.stopPropagation()}
@@ -197,7 +197,7 @@ export default function FarmerHarvestsTable({
                 <X className="size-4" />
               </button>
             </div>
-            <div className="max-h-[78vh] overflow-y-auto p-5">
+            <div className="max-h-[85vh] overflow-y-auto p-4 sm:max-h-[78vh] sm:p-5">
               <HarvestEditorForm
                 locale={locale}
                 messages={messages}

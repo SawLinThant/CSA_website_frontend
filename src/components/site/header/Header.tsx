@@ -73,21 +73,6 @@ export default function Header({ auth }: { auth: ShellAuthState }) {
             />
           ))}
           <div className="ml-4 hidden items-center gap-2 md:flex">
-            {/* {isFarmer ? (
-              <Link
-                href={withLocalePath(locale, "/farmer")}
-                className="rounded-[10px] px-3 py-2 text-sm font-medium text-primary hover:bg-primary/10"
-              >
-                {messages.farmer.navDashboard}
-              </Link>
-            ) : (
-              <Link
-                href={withLocalePath(locale, "/farmer-portal/login")}
-                className="rounded-[10px] px-3 py-2 text-sm font-medium text-primary hover:bg-primary/10"
-              >
-                {messages.farmer.navDashboard}
-              </Link>
-            )} */}
             {isLoggedIn ? (
               <>
               {isCustomer ? (
