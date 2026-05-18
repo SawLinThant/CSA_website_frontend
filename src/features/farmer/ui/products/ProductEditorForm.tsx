@@ -42,6 +42,26 @@ export default function ProductEditorForm({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
 
+  const logClientFormData = (label: string, formData: FormData) => {
+    if (process.env.NODE_ENV !== "development") return;
+    const entries = Array.from(formData.entries()).map(([key, value]) =>
+      value instanceof File
+        ? {
+            key,
+            type: "file",
+            name: value.name,
+            size: value.size,
+            mime: value.type,
+          }
+        : {
+            key,
+            type: "text",
+            value,
+          },
+    );
+    console.debug(`[ProductEditorForm] ${label}`, entries);
+  };
+
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
@@ -52,6 +72,7 @@ export default function ProductEditorForm({
     startTransition(async () => {
       if (mode === "create") {
         if (hasFiles) {
+          logClientFormData("create upload payload", fd);
           const r = await createProductUploadAction(locale, fd);
           if (!r.ok) {
             toast.error(r.error ?? messages.error);
@@ -91,6 +112,7 @@ export default function ProductEditorForm({
       if (!product) return;
 
       if (hasFiles) {
+        logClientFormData("update upload payload", fd);
         const r = await updateProductUploadAction(locale, product.id, fd);
         if (!r.ok) {
           toast.error(r.error ?? messages.error);

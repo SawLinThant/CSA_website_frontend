@@ -13,6 +13,59 @@ import {
 
 export type MutateState = { ok: boolean; error?: string };
 
+function logServerFormData(label: string, formData: FormData): void {
+  if (process.env.NODE_ENV !== "development") return;
+  const entries = Array.from(formData.entries()).map(([key, value]) =>
+    value instanceof File
+      ? {
+          key,
+          type: "file",
+          name: value.name,
+          size: value.size,
+          mime: value.type,
+        }
+      : {
+          key,
+          type: "text",
+          value,
+        },
+  );
+  console.log(`[productActions] ${label}`, entries);
+}
+
+type MultipartSnapshotPart =
+  | { key: string; kind: "text"; value: string }
+  | {
+      key: string;
+      kind: "file";
+      bytes: Uint8Array;
+      name: string;
+      mime: string;
+    };
+
+async function snapshotMultipart(formData: FormData): Promise<MultipartSnapshotPart[]> {
+  const parts: MultipartSnapshotPart[] = [];
+  for (const [key, value] of formData.entries()) {
+    if (value instanceof File) {
+      const bytes = new Uint8Array(await value.arrayBuffer());
+      parts.push({
+        key,
+        kind: "file",
+        bytes,
+        name: value.name,
+        mime: value.type,
+      });
+    } else {
+      parts.push({
+        key,
+        kind: "text",
+        value,
+      });
+    }
+  }
+  return parts;
+}
+
 export async function deleteProductAction(productId: string, locale: string): Promise<MutateState> {
   try {
     await deleteProduct(productId);
@@ -59,12 +112,24 @@ async function forwardMultipart(
   let token = await getAccessToken();
   if (!token) return { ok: false, error: "Unauthorized" };
 
+  logServerFormData("raw server action formData", formData);
+
+  const rawParts = await snapshotMultipart(formData);
+  const normalizedParts = rawParts
+    .filter((part) => !part.key.startsWith("_") && !part.key.startsWith("$ACTION_") && !/^\d+$/.test(part.key))
+    .map((part) => ({ ...part, key: part.key.replace(/^\d+_/, "") }))
+    .filter((part) => part.key.length > 0);
+
   const build = () => {
     const fd = new FormData();
-    for (const [k, v] of formData.entries()) {
-      if (k.startsWith("_")) continue;
-      fd.append(k, v);
+    for (const part of normalizedParts) {
+      if (part.kind === "file") {
+        fd.append(part.key, new File([part.bytes], part.name, { type: part.mime }));
+      } else {
+        fd.append(part.key, part.value);
+      }
     }
+    logServerFormData("normalized multipart formData", fd);
     return fd;
   };
 
@@ -74,6 +139,7 @@ async function forwardMultipart(
     headers: { Authorization: `Bearer ${token}` },
     body: build(),
   });
+  console.log("[productActions] upload response", { path, status: res.status, retried: false });
 
   if (res.status === 401) {
     const refreshed = await forceRefreshAccessToken();
@@ -84,6 +150,7 @@ async function forwardMultipart(
       headers: { Authorization: `Bearer ${token}` },
       body: build(),
     });
+    console.log("[productActions] upload response", { path, status: res.status, retried: true });
   }
 
   if (!res.ok) {

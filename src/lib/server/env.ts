@@ -7,8 +7,8 @@ const envSchema = z
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 
     // Base URL for the existing Express backend (e.g. `http://localhost:4000`).
-    API_BASE_URL: z.string().url().default("https://csa-backend-service.vercel.app/"),
-    //API_BASE_URL: z.string().url().default("http://localhost:4000"),
+    API_BASE_URL: z.string().url().default("http://43.209.197.192"),
+   // API_BASE_URL: z.string().url().default("http://localhost:4000"),
 
     // httpOnly cookie names for refresh/access tokens.
     AUTH_REFRESH_TOKEN_COOKIE_NAME: z.string().default("refreshToken"),
