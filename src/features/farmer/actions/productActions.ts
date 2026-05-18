@@ -38,7 +38,7 @@ type MultipartSnapshotPart =
   | {
       key: string;
       kind: "file";
-      bytes: Uint8Array;
+      buffer: ArrayBuffer;
       name: string;
       mime: string;
     };
@@ -47,11 +47,10 @@ async function snapshotMultipart(formData: FormData): Promise<MultipartSnapshotP
   const parts: MultipartSnapshotPart[] = [];
   for (const [key, value] of formData.entries()) {
     if (value instanceof File) {
-      const bytes = new Uint8Array(await value.arrayBuffer());
       parts.push({
         key,
         kind: "file",
-        bytes,
+        buffer: await value.arrayBuffer(),
         name: value.name,
         mime: value.type,
       });
@@ -124,7 +123,7 @@ async function forwardMultipart(
     const fd = new FormData();
     for (const part of normalizedParts) {
       if (part.kind === "file") {
-        fd.append(part.key, new File([part.bytes], part.name, { type: part.mime }));
+        fd.append(part.key, new File([part.buffer], part.name, { type: part.mime }));
       } else {
         fd.append(part.key, part.value);
       }
